@@ -8,20 +8,26 @@
     #chat { border: 1px solid #ccc; padding: 1em; height: 400px; overflow-y: auto; }
     .message { margin: 0.5em 0; }
     .user { font-weight: bold; }
+    #controls { margin-top: 0.5em; }
+    #reset { margin-left: 1em; }
   </style>
 </head>
 <body>
   <h1>Chatbot</h1>
   <div id="chat"></div>
-  <form id="frm">
-    <input id="inp" autocomplete="off" placeholder="Say something..." style="width: 80%">
-    <button>Send</button>
-  </form>
+  <div id="controls">
+    <form id="frm" style="display:inline">
+      <input id="inp" autocomplete="off" placeholder="Say something..." style="width: 70%">
+      <button>Send</button>
+    </form>
+    <button id="reset">Reset Conversation</button>
+  </div>
 
   <script>
     const chat = document.getElementById('chat');
     const form = document.getElementById('frm');
     const inp = document.getElementById('inp');
+    const resetBtn = document.getElementById('reset');
 
     form.addEventListener('submit', async e => {
       e.preventDefault();
@@ -29,14 +35,19 @@
       if (!text) return;
       append('You', text);
       inp.value = '';
-
       const res = await fetch('/chat', {
         method: 'POST',
         headers: {'Content-Type':'application/json'},
         body: JSON.stringify({prompt: text})
       });
       const data = await res.json();
-      append('Bot', data.reply);
+      append('Bot', data.reply || data.error);
+    });
+
+    resetBtn.addEventListener('click', async () => {
+      await fetch('/reset', { method: 'POST' });
+      sessionStorage.clear();
+      chat.innerHTML = '';
     });
 
     function append(who, txt) {
