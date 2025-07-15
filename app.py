@@ -5,10 +5,16 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# 1. Configuration from env vars (with sensible defaults)
+# Configuration from environment variables (with sensible defaults)
 API_BASE = os.getenv("OPENAI_API_BASE", "http://localhost:1234/v1")
 API_KEY  = os.getenv("OPENAI_API_KEY", "dummy-key")
 MODEL    = "colossal-llama-2-7b-base"
+
+# System instruction to wrap the base model prompts
+SYSTEM_INSTRUCTION = (
+    "You are a friendly English-only assistant. "
+    "Do not define words—just respond conversationally."
+)
 
 @app.route('/')
 def home():
@@ -17,14 +23,21 @@ def home():
 @app.route('/chat', methods=['POST'])
 def chat():
     data = request.get_json()
-    prompt = data.get('prompt', '').strip()
-    if not prompt:
+    user_input = data.get('prompt', '').strip()
+    if not user_input:
         return jsonify(reply="(no prompt)"), 400
 
-    # 2. Build the payload exactly as LM Studio expects at /v1/completions
+    # Wrap the user's input with a system instruction and dialogue format
+    wrapped_prompt = (
+        f"{SYSTEM_INSTRUCTION}\n\n"
+        f"User: {user_input}\n"
+        "Assistant:"
+    )
+
+    # Build the payload for the completions endpoint
     payload = {
         "model": MODEL,
-        "prompt": prompt,
+        "prompt": wrapped_prompt,
         "max_tokens": 150,
         "temperature": 0.7
     }
@@ -33,16 +46,16 @@ def chat():
         "Authorization": f"Bearer {API_KEY}"
     }
 
-    # 3. POST to the local LM Studio endpoint
+    # Send the request to LM Studio's local API
     resp = requests.post(f"{API_BASE}/completions", json=payload, headers=headers)
     if not resp.ok:
-        # surface any server-side error
         return jsonify(error=f"{resp.status_code} {resp.text}"), 500
 
-    # 4. Parse out the generated text
+    # Extract the assistant's reply from the response
     body = resp.json()
     text = body.get("choices", [{}])[0].get("text", "").strip()
     return jsonify(reply=text)
 
 if __name__ == '__main__':
+    # Run the Flask development server
     app.run()
