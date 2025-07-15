@@ -8,8 +8,9 @@ Talk to a local LLM in your browser, then run an automated red-team suite to pro
 ## Features
 
 - 🔌 **Local LLM**: Uses LM Studio’s OpenAI-compatible API on `http://localhost:1234/v1`  
-- 🌐 **Web UI**: Simple Flask app with a chat window  
-- 🛡️ **Red-teaming**: Promptfoo config ready to generate and evaluate adversarial prompts  
+- 🌐 **Web UI**: Simple Flask app with a chat window
+- 💾 **Persistent history**: Chat logs survive page reloads until you click Reset
+- 🛡️ **Red-teaming**: Promptfoo config ready to generate and evaluate adversarial prompts
 
 ---
 
@@ -68,8 +69,9 @@ export OPENAI_API_KEY="dummy-key"
    flask run
    ~~~
 
-2. **Open your browser** at [http://127.0.0.1:5000](http://127.0.0.1:5000)  
+2. **Open your browser** at [http://127.0.0.1:5000](http://127.0.0.1:5000)
 3. **Chat away!** Type a message and hit Send to get a reply from your local model.
+4. Use **Reset Conversation** to clear the history if needed
 
 ---
 
