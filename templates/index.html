@@ -29,6 +29,9 @@
     const inp = document.getElementById('inp');
     const resetBtn = document.getElementById('reset');
 
+    // Rehydrate conversation history on load
+    loadHistory();
+
     form.addEventListener('submit', async e => {
       e.preventDefault();
       const text = inp.value.trim();
@@ -55,6 +58,21 @@
       div.className = 'message';
       div.innerHTML = `<span class="${who==='You'?'user':''}">${who}:</span> ${txt}`;
       chat.appendChild(div);
+      chat.scrollTop = chat.scrollHeight;
+
+      const history = JSON.parse(sessionStorage.getItem('history') || '[]');
+      history.push({ who, txt });
+      sessionStorage.setItem('history', JSON.stringify(history));
+    }
+
+    function loadHistory() {
+      const history = JSON.parse(sessionStorage.getItem('history') || '[]');
+      history.forEach(({ who, txt }) => {
+        const div = document.createElement('div');
+        div.className = 'message';
+        div.innerHTML = `<span class="${who==='You'?'user':''}">${who}:</span> ${txt}`;
+        chat.appendChild(div);
+      });
       chat.scrollTop = chat.scrollHeight;
     }
   </script>
