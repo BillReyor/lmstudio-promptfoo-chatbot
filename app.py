@@ -1,16 +1,14 @@
+# app.py
 import os
+import requests
 from flask import Flask, render_template, request, jsonify
-from openai import OpenAI  # new SDK import
 
 app = Flask(__name__)
 
-# 1. Instantiate the new client with your LM Studio settings
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY"),
-    api_base=os.getenv("OPENAI_API_BASE")
-)
-
-MODEL = "colossal-llama-2-7b-base"
+# 1. Configuration from env vars (with sensible defaults)
+API_BASE = os.getenv("OPENAI_API_BASE", "http://localhost:1234/v1")
+API_KEY  = os.getenv("OPENAI_API_KEY", "dummy-key")
+MODEL    = "colossal-llama-2-7b-base"
 
 @app.route('/')
 def home():
@@ -23,20 +21,28 @@ def chat():
     if not prompt:
         return jsonify(reply="(no prompt)"), 400
 
-    try:
-        # 2. Use the new completions endpoint
-        resp = client.completions.create(
-            model=MODEL,
-            prompt=prompt,
-            max_tokens=150,
-            temperature=0.7
-        )
-        text = resp.choices[0].text.strip()
-        return jsonify(reply=text)
+    # 2. Build the payload exactly as LM Studio expects at /v1/completions
+    payload = {
+        "model": MODEL,
+        "prompt": prompt,
+        "max_tokens": 150,
+        "temperature": 0.7
+    }
+    headers = {
+        "Content-Type":  "application/json",
+        "Authorization": f"Bearer {API_KEY}"
+    }
 
-    except Exception as e:
-        # 3. Surface any errors back to the client for easy debugging
-        return jsonify(error=str(e)), 500
+    # 3. POST to the local LM Studio endpoint
+    resp = requests.post(f"{API_BASE}/completions", json=payload, headers=headers)
+    if not resp.ok:
+        # surface any server-side error
+        return jsonify(error=f"{resp.status_code} {resp.text}"), 500
+
+    # 4. Parse out the generated text
+    body = resp.json()
+    text = body.get("choices", [{}])[0].get("text", "").strip()
+    return jsonify(reply=text)
 
 if __name__ == '__main__':
     app.run()
