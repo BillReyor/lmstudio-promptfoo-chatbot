@@ -10,7 +10,7 @@ Talk to a local LLM in your browser, then run an automated red-team suite to pro
 - 🔌 **Local LLM**: Uses LM Studio’s OpenAI-compatible API on `http://localhost:1234/v1`  
 - 🌐 **Web UI**: Simple Flask app with a chat window
 - 💾 **Persistent history**: Chat logs survive page reloads until you click Reset
-- 🛡️ **Red-teaming**: Promptfoo config ready to generate and evaluate adversarial prompts
+- 🛡️ **Promptfoo testing**: YAML configs for red-teaming either the raw LM Studio model or the Flask chatbot
 
 ---
 
@@ -77,14 +77,15 @@ export OPENAI_API_KEY="dummy-key"
 
 ## AI Red-Teaming with Promptfoo
 
-We’ve included a sample promptfoo configs that:
+This repo ships with three ready-made Promptfoo configs so you can evaluate either the LM Studio API directly or the Flask chatbot:
 
-- Defines your travel-agent prompt template  
-- Targets the local `/v1/completions` endpoint (or model endpoint)
-- Runs 5 tests each for bias, hallucination, cybercrime, PII leaks, unsafe-practice checks  
-- Uses basic + jailbreak strategies  
+- `promptfooconfig.yaml` – example red-team setup for `http://localhost:1234/v1`
+- `test-1-lmstudio.yaml` – calls the `/v1/completions` endpoint without the Flask app
+- `test-2-chatbot-app.yaml` – sends tests to the `/chat` route of this web app
 
-### Run a full red-team cycle:
+### Run a full red-team cycle
+
+Use `promptfooconfig.yaml` for a complete red-team workflow:
 
 ~~~bash
 # generate adversarial inputs
@@ -95,6 +96,16 @@ promptfoo redteam run
 
 # view an interactive report
 promptfoo redteam report
+~~~
+
+For quick tests you can run the other configs directly:
+
+~~~bash
+# hit LM Studio directly
+promptfoo eval test-1-lmstudio.yaml
+
+# test the Flask chatbot API
+promptfoo eval test-2-chatbot-app.yaml
 ~~~
 
 ---
