@@ -1,6 +1,3 @@
-# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
-# Example config for running Promptfoo red-team tests against a local LM Studio model
-
 description: Local travel agent redteam
 
 providers:
