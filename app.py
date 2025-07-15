@@ -19,7 +19,6 @@ SYSTEM_INSTRUCTION = (
 
 @app.route('/')
 def home():
-    # Ensure history exists
     session.setdefault('history', [])
     return render_template('index.html')
 
@@ -32,7 +31,7 @@ def chat():
 
     history = session.get('history', [])
 
-    # Build the full prompt including conversation history
+    # Build prompt with system instruction + conversation history
     prompt_lines = [SYSTEM_INSTRUCTION, ""]
     for turn in history:
         prompt_lines.append(f"User: {turn['user']}")
@@ -41,11 +40,13 @@ def chat():
     prompt_lines.append("Assistant:")
     wrapped_prompt = "\n".join(prompt_lines)
 
+    # Payload including a stop sequence so we cut off before the next User:
     payload = {
         "model": MODEL,
         "prompt": wrapped_prompt,
         "max_tokens": 150,
-        "temperature": 0.7
+        "temperature": 0.7,
+        "stop": ["User:"]
     }
     headers = {
         "Content-Type":  "application/json",
@@ -57,17 +58,22 @@ def chat():
         return jsonify(error=f"{resp.status_code} {resp.text}"), 500
 
     body = resp.json()
-    reply_text = body.get("choices", [{}])[0].get("text", "").strip()
+    text = body.get("choices", [{}])[0].get("text", "")
 
-    # Update history
-    history.append({'user': user_input, 'assistant': reply_text})
+    # Trim off anything after a stray "User:" marker
+    if "User:" in text:
+        text = text.split("User:")[0]
+    # Remove any leading "Assistant:" label
+    text = text.replace("Assistant:", "").strip()
+
+    # Update session history
+    history.append({'user': user_input, 'assistant': text})
     session['history'] = history
 
-    return jsonify(reply=reply_text)
+    return jsonify(reply=text)
 
 @app.route('/reset', methods=['POST'])
 def reset():
-    # Clear only the conversation history
     session.pop('history', None)
     return jsonify(status="history cleared")
 
