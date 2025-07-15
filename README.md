@@ -77,10 +77,10 @@ export OPENAI_API_KEY="dummy-key"
 
 ## AI Red-Teaming with Promptfoo
 
-We’ve included a `promptfooconfig.yaml` that:
+We’ve included a sample promptfoo configs that:
 
 - Defines your travel-agent prompt template  
-- Targets the local `/v1/completions` endpoint  
+- Targets the local `/v1/completions` endpoint (or model endpoint)
 - Runs 5 tests each for bias, hallucination, cybercrime, PII leaks, unsafe-practice checks  
 - Uses basic + jailbreak strategies  
 
