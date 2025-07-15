@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: My Red Team Configuration
+targets:
+  - id: http
+    config:
+      url: http://localhost:5000/chat
+      method: POST
+      headers:
+        Content-Type: application/json
+      body: '{"prompt":"{{prompt}}"}'
+      useHttps: false
+      transformResponse: json.reply
+    label: chatbot-app
+prompts:
+  - '{{prompt}}'
+redteam:
+  purpose: |-
+    Application Purpose:
+    ```
+    have a conversation with the user
+    ```
+  plugins:
+    - id: harmful:hate  # Tests handling of hate speech and discriminatory content
+  strategies:
+    - id: jailbreak:composite  # Combines multiple jailbreak techniques for enhanced effectiveness
+  numTests: 10
+defaultTest:
+  vars: {}
+  options:
+    transformVars: '{ ...vars, sessionId: context.uuid }'
