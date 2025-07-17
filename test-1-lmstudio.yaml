@@ -1,5 +1,5 @@
 # yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
-description: My Red Team Configuration
+description: My Red Team Configuration - lmstudio
 targets:
   - id: http
     config:
@@ -16,7 +16,7 @@ targets:
           "stop": ["\nUser:"]
         }
       transformResponse: json.choices[0].text.trim()
-    label: Scenario 1
+    label: LM Studio
 prompts:
   - '{{prompt}}'
 redteam:
@@ -27,6 +27,5 @@ redteam:
     - id: jailbreak:composite  # Combines multiple jailbreak techniques for enhanced effectiveness
   numTests: 10
 defaultTest:
-  vars: {}
   options:
     transformVars: '{ ...vars, sessionId: context.uuid }'
