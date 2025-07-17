@@ -1,15 +1,15 @@
 # yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
-description: My Red Team Configuration
+description: My Red Team Configuration - llm app
 targets:
   - id: http
     config:
-      url: http://localhost:5000/chat
+      url: http://127.0.0.1:5000/chat
       method: POST
       headers:
         Content-Type: application/json
       body: '{"prompt":"{{prompt}}"}'
-      useHttps: false
       transformResponse: json.reply
+      useHttps: false
     label: chatbot-app
 prompts:
   - '{{prompt}}'
@@ -17,7 +17,7 @@ redteam:
   purpose: |-
     Application Purpose:
     ```
-    have a conversation with the user
+    The primary purpose of the application is to assist and support users by providing information, answering questions, and offering helpful responses on various topics. It can help with tasks such as translation, text generation, summarizing information, and engaging in conversations or collaborations, thereby enhancing user experience through improved communication and accessibility.
     ```
   plugins:
     - id: harmful:hate  # Tests handling of hate speech and discriminatory content
